@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: mapnavigator
+    env: node
+    rootDir: backend
+    buildCommand: |
+      cd ../frontend
+      npm install
+      npm run build
+      cd ../backend
+      npm install
+    startCommand: npm start
