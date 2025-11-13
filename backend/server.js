@@ -83,10 +83,10 @@ app.get('/api/route', async (req, res) => {
 // ----------------------------
 
 const __dirnameFull = path.resolve();
-app.use(express.static(path.join(__dirnameFull, 'frontend', 'build')));
+app.use(express.static(path.join(__dirnameFull,'..', 'frontend', 'build')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirnameFull, 'frontend', 'build', 'index.html'));
+  res.sendFile(path.join(__dirnameFull,'..' ,'frontend', 'build', 'index.html'));
 });
 
 // ----------------------------
