@@ -31,7 +31,7 @@ app.get('/api/search', async (req, res) => {
       addressdetails: 1,
       limit: 6
     };
-    const response = await axios.get(url, { params, headers: { 'User-Agent': 'map-navigator-demo' }});
+    const response = await axios.get(url, { params, headers: { 'User-Agent': 'map-navigator-demo' } });
     const results = response.data.map(r => ({
       display_name: r.display_name,
       lat: r.lat,
@@ -83,11 +83,10 @@ app.get('/api/route', async (req, res) => {
 // ----------------------------
 
 const __dirnameFull = path.resolve();
-app.use(express.static(path.join(__dirnameFull, 'frontend', 'public')));
+app.use(express.static(path.join(__dirnameFull, 'frontend', 'build')));
 
-// For any unknown route, serve the React index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirnameFull, 'frontend', 'public', 'index.html'));
+  res.sendFile(path.join(__dirnameFull, 'frontend', 'build', 'index.html'));
 });
 
 // ----------------------------
