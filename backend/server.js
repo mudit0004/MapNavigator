@@ -1,14 +1,8 @@
-// ----------------------------
-// 📦 Dependencies
-// ----------------------------
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
 
-// ----------------------------
-// ⚙️ App Setup
-// ----------------------------
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -16,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // ----------------------------
-// ✅ API ROUTES
+// 🟢 API ROUTES
 // ----------------------------
 
 // Health check
@@ -24,12 +18,10 @@ app.get('/api', (req, res) => {
   res.json({ ok: true, service: 'Map Navigator Backend' });
 });
 
-// 🗺️ Search using Nominatim (OpenStreetMap)
+// Search using OpenStreetMap Nominatim
 app.get('/api/search', async (req, res) => {
   const q = req.query.q;
-  if (!q || q.trim() === '') {
-    return res.status(400).json({ error: 'q param required' });
-  }
+  if (!q || q.trim() === '') return res.status(400).json({ error: 'q param required' });
 
   try {
     const url = `https://nominatim.openstreetmap.org/search`;
@@ -39,12 +31,7 @@ app.get('/api/search', async (req, res) => {
       addressdetails: 1,
       limit: 6
     };
-
-    const response = await axios.get(url, { 
-      params, 
-      headers: { 'User-Agent': 'map-navigator-demo' }
-    });
-
+    const response = await axios.get(url, { params, headers: { 'User-Agent': 'map-navigator-demo' }});
     const results = response.data.map(r => ({
       display_name: r.display_name,
       lat: r.lat,
@@ -52,18 +39,16 @@ app.get('/api/search', async (req, res) => {
       type: r.type,
       boundingbox: r.boundingbox
     }));
-
     res.json(results);
   } catch (err) {
-    console.error('Nominatim error:', err?.message || err);
+    console.error('Nominatim error', err?.message || err);
     res.status(500).json({ error: 'Failed to query search provider' });
   }
 });
 
-// 🚗 Routing using OSRM
+// Routing using OSRM
 app.get('/api/route', async (req, res) => {
   const { fromLat, fromLng, toLat, toLng } = req.query;
-
   if (!fromLat || !fromLng || !toLat || !toLng) {
     return res.status(400).json({ error: 'fromLat, fromLng, toLat, toLng are required' });
   }
@@ -77,42 +62,36 @@ app.get('/api/route', async (req, res) => {
       steps: false,
       alternatives: false
     };
-
     const response = await axios.get(url, { params });
-
     if (response.data.code !== 'Ok') {
-      return res.status(500).json({ 
-        error: 'Routing provider returned error', 
-        detail: response.data 
-      });
+      return res.status(500).json({ error: 'Routing provider returned error', detail: response.data });
     }
-
     const route = response.data.routes[0];
     res.json({
-      distance: route.distance,   // meters
-      duration: route.duration,   // seconds
-      geometry: route.geometry    // GeoJSON LineString
+      distance: route.distance,
+      duration: route.duration,
+      geometry: route.geometry
     });
   } catch (err) {
-    console.error('OSRM error:', err?.message || err);
+    console.error('OSRM error', err?.message || err);
     res.status(500).json({ error: 'Failed to query routing provider' });
   }
 });
 
 // ----------------------------
-// 🌐 SERVE FRONTEND BUILD (React)
+// 🟣 SERVE FRONTEND (React build)
 // ----------------------------
-const __dirnameFull = path.resolve();
-app.use(express.static(path.join(__dirnameFull, 'frontend', 'build')));
 
-// Serve React index.html for any unknown route
+const __dirnameFull = path.resolve();
+app.use(express.static(path.join(__dirnameFull, 'frontend', 'public')));
+
+// For any unknown route, serve the React index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirnameFull, 'frontend', 'build', 'index.html'));
+  res.sendFile(path.join(__dirnameFull, 'frontend', 'public', 'index.html'));
 });
 
 // ----------------------------
-// 🚀 Start Server
-// ----------------------------
+
 app.listen(PORT, () => {
-  console.log(`✅ Map Navigator server running on port ${PORT}`);
+  console.log(`✅ Backend + Frontend running on port ${PORT}`);
 });
